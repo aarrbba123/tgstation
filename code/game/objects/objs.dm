@@ -186,7 +186,7 @@ GLOBAL_LIST_EMPTY(objects_by_id_tag)
 	SIGNAL_HANDLER
 	if(!machine)
 		return
-	UnregisterSignal(machine, COMSIG_PARENT_QDELETING)
+	UnregisterSignal(machine, COMSIG_QDELETING)
 	machine.on_unset_machine(src)
 	machine = null
 
@@ -198,7 +198,7 @@ GLOBAL_LIST_EMPTY(objects_by_id_tag)
 	if(machine)
 		unset_machine()
 	machine = O
-	RegisterSignal(O, COMSIG_PARENT_QDELETING, PROC_REF(unset_machine))
+	RegisterSignal(O, COMSIG_QDELETING, PROC_REF(unset_machine))
 	if(istype(O))
 		O.obj_flags |= IN_USE
 
@@ -333,8 +333,8 @@ GLOBAL_LIST_EMPTY(objects_by_id_tag)
 		return TRUE
 	return ..()
 
-/obj/proc/plunger_act(obj/item/plunger/P, mob/living/user, reinforced)
-	return
+/obj/proc/plunger_act(obj/item/plunger/attacking_plunger, mob/living/user, reinforced)
+	return SEND_SIGNAL(src, COMSIG_PLUNGER_ACT, attacking_plunger, user, reinforced)
 
 // Should move all contained objects to it's location.
 /obj/proc/dump_contents()
@@ -343,7 +343,7 @@ GLOBAL_LIST_EMPTY(objects_by_id_tag)
 /obj/handle_ricochet(obj/projectile/P)
 	. = ..()
 	if(. && receive_ricochet_damage_coeff)
-		take_damage(P.damage * receive_ricochet_damage_coeff, P.damage_type, P.armor_flag, 0, turn(P.dir, 180), P.armour_penetration) // pass along receive_ricochet_damage_coeff damage to the structure for the ricochet
+		take_damage(P.damage * receive_ricochet_damage_coeff, P.damage_type, P.armor_flag, 0, REVERSE_DIR(P.dir), P.armour_penetration) // pass along receive_ricochet_damage_coeff damage to the structure for the ricochet
 
 /// Handles exposing an object to reagents.
 /obj/expose_reagents(list/reagents, datum/reagents/source, methods=TOUCH, volume_modifier=1, show_message=TRUE)
